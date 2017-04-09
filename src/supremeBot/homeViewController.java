@@ -81,7 +81,9 @@ public class homeViewController implements Initializable {
 
     @FXML
     private Button startBtn;
-
+    
+    Account clipboard;
+    
     @FXML
     private void handleAddAction(ActionEvent event) throws IOException {
 
@@ -141,9 +143,18 @@ public class homeViewController implements Initializable {
         private void handleKeyAction(KeyEvent event) {
         
         if (event.getCode().equals(KeyCode.DELETE)) {
-            //Delete or whatever you like:
-          
+            //Delete or whatever you like:       
             data.remove(mainTable.getSelectionModel().getSelectedItem());
+        }                
+        if (event.getCode() == KeyCode.C && event.isControlDown()) {
+             clipboard = mainTable.getSelectionModel().getSelectedItem();
+                
+        }
+        
+        if (event.getCode() == KeyCode.V && event.isControlDown()) {
+            if(clipboard!=null)
+                data.add(clipboard);
+                
         }
         
         }
