@@ -53,14 +53,16 @@ public class Phantom {
                 PhantomJSDriverService.PHANTOMJS_CLI_ARGS,
                 new String[]{"--load-images=no"});
 
-        driver = new PhantomJSDriver(desiredCapabilities);
-        //driver = new ChromeDriver();
+        //driver = new PhantomJSDriver(desiredCapabilities);
+        driver = new ChromeDriver();
         if (driver instanceof JavascriptExecutor) {
             js = (JavascriptExecutor) driver;
         }
 
         driver.get("http://www.supremenewyork.com/");
-
+        
+        Thread.sleep(1000);
+        
         setCookie(constructCookieValue(person));
         long ttStart = System.currentTimeMillis();
         // driver.manage().addCookie(cookie);
