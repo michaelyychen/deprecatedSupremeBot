@@ -191,15 +191,18 @@ public class Phantom {
         long tDelta = tEnd - ttStart;
         double elapsedSeconds = tDelta / 1000.0;
       
+        System.out.println(elapsedSeconds);
+        
         person.setStatus("Waiting for Confirmation");
-
+        
         TimeUnit.SECONDS.sleep(5);
 
         srcFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
 
-        FileUtils.copyFile(srcFile, new File(new SimpleDateFormat("yyyyMMdd_HH-mm-ss").format(Calendar.getInstance().getTime()) + person.getName() + "confirmation.png"));
+        FileUtils.copyFile(srcFile, new File(new SimpleDateFormat("yyyyMMdd_HH-mm-ss").format(Calendar.getInstance().getTime()) + person.getName() + ThreadLocalRandom.current().nextInt(1,100)+"confirmation.png"));
 
         WebElement t =waitElement(driver, By.xpath("//*[@id=\"confirmation\"]"));
+        
         
         if(t.getText().startsWith("Unfortunately")){
         person.setStatus("Unfortunately");
@@ -209,7 +212,7 @@ public class Phantom {
         
        
 
-        
+      
        
         
         driver.quit();
