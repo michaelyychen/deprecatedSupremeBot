@@ -53,15 +53,20 @@ public class Phantom {
                 PhantomJSDriverService.PHANTOMJS_CLI_ARGS,
                 new String[]{"--load-images=no"});
 
-        //driver = new PhantomJSDriver(desiredCapabilities);
-        driver = new ChromeDriver();
+        driver = new PhantomJSDriver(desiredCapabilities);
+        //driver = new ChromeDriver();
         if (driver instanceof JavascriptExecutor) {
             js = (JavascriptExecutor) driver;
         }
 
-        driver.get("http://www.supremenewyork.com/");
         
-        Thread.sleep(1000);
+        while(!driver.getCurrentUrl().equals("http://www.supremenewyork.com/")){
+            
+                driver.navigate().refresh();
+                driver.get("http://www.supremenewyork.com/");        
+                Thread.sleep(1000);
+        }
+
         
         setCookie(constructCookieValue(person));
         long ttStart = System.currentTimeMillis();
@@ -106,7 +111,7 @@ public class Phantom {
             driver.quit();
             return;
         }
-        person.setStatus("added to cart");
+        person.setStatus("Added to cart");
 
         long tStart = System.currentTimeMillis();
         long tEnd = tStart;
@@ -117,7 +122,7 @@ public class Phantom {
             if (((tEnd - tStart) / 1000.0) > 5) {
                 tStart = System.currentTimeMillis();
                 driver.navigate().refresh();
-                person.setStatus("retrying");
+                person.setStatus("Retrying");
                 if (isElementExists(driver, By.xpath("//*[@id=\"add-remove-buttons\"]/input"))) {
 
                     if (!sizeWanted.equalsIgnoreCase("Free")) {
@@ -141,13 +146,13 @@ public class Phantom {
         }
 
         driver.get("https://www.supremenewyork.com/checkout");
-        tEnd = System.currentTimeMillis();
-        long tDelta = tEnd - tStart;
-        double elapsedSeconds = tDelta / 1000.0;
-
-        System.out.println(elapsedSeconds);
+//        tEnd = System.currentTimeMillis();
+//        long tDelta = tEnd - tStart;
+//        double elapsedSeconds = tDelta / 1000.0;
+//
+//        System.out.println(elapsedSeconds);
         
-        
+        person.setStatus("Filling Form");
         Thread.sleep(2000);
 //        srcFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
 //
@@ -185,20 +190,29 @@ public class Phantom {
 
      
 
-//        tEnd = System.currentTimeMillis();
-//        tDelta = tEnd - ttStart;
-//        elapsedSeconds = tDelta / 1000.0;
-//
-//        System.out.println("Total Checkout Elapsed Time: " + elapsedSeconds);
+        tEnd = System.currentTimeMillis();
+        long tDelta = tEnd - ttStart;
+        double elapsedSeconds = tDelta / 1000.0;
+
+        System.out.println( elapsedSeconds);
         person.setStatus("Waiting for Confirmation");
 
-        TimeUnit.SECONDS.sleep(10);
+        TimeUnit.SECONDS.sleep(5);
 
         srcFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
 
         FileUtils.copyFile(srcFile, new File(new SimpleDateFormat("yyyyMMdd_HH-mm-ss").format(Calendar.getInstance().getTime()) + person.getName() + "confirmation.png"));
 
-        person.setStatus("Finished");
+        WebElement t =waitElement(driver, By.xpath("//*[@id=\"confirmation\"]"));
+        
+        if(t.getText().startsWith("Unfortunately")){
+        person.setStatus("Unfortunately");
+        }else{
+        person.setStatus("Succeeded");
+        }
+        
+        
+        
         driver.quit();
     }
 

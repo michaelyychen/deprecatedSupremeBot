@@ -14,6 +14,8 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -187,37 +189,63 @@ public class homeViewController implements Initializable {
         
         
         @FXML
-        private void handleStartRequest(ActionEvent event) {
+        private void handleStartRequest(ActionEvent event) throws InterruptedException {
         startBtn.setDisable(true);
+        startBtn.setMinWidth(100);
+        startBtn.setText("Running...");
 
-            for (Account user : data) {
+//           for (Account user : data) {
+//
+//                Thread one;
+//                one = new Thread() {
+//
+//                    public void run() {
+//
+//                        try {
+//                            Phantom p = new Phantom();
+//                            list.add(p);
+//                            String target = "//div[h1='" + user.getItem() + "' and p='" + user.getColor() + "']/a";
+//                            p.runPhantom("http://www.supremenewyork.com/shop/all/" + user.getCategory(), By.xpath(target), user.getSize(), user, user.getItem(), user.getColor());
+//                        } catch (InterruptedException ex) {
+//                            Logger.getLogger(homeViewController.class.getName()).log(Level.SEVERE, null, ex);
+//                        } catch (IOException ex) {
+//                            Logger.getLogger(homeViewController.class.getName()).log(Level.SEVERE, null, ex);
+//                        } catch (ParseException ex) {
+//                            Logger.getLogger(homeViewController.class.getName()).log(Level.SEVERE, null, ex);
+//                        }
+//
+//                    }
+//
+//                };
+//
+//                one.start();
+//
+//                Thread.sleep(100);
+//            }
 
-                Thread one;
-                one = new Thread() {
+ExecutorService executorService = Executors.newFixedThreadPool(data.size());
+for(Account user : data){
+executorService.execute(new Runnable() {
+    public void run() {
+        try {
+            Phantom p = new Phantom();
+            list.add(p);
+            String target = "//div[h1='" + user.getItem() + "' and p='" + user.getColor() + "']/a";
+            p.runPhantom("http://www.supremenewyork.com/shop/all/" + user.getCategory(), By.xpath(target), user.getSize(), user, user.getItem(), user.getColor());
+        } catch (InterruptedException ex) {
+            Logger.getLogger(homeViewController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(homeViewController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParseException ex) {
+            Logger.getLogger(homeViewController.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
-                    public void run() {
+    }
+}
+        );
+}
+executorService.shutdown();
 
-                        try {
-                            Phantom p = new Phantom();
-                            list.add(p);
-                            String target = "//div[h1='" + user.getItem() + "' and p='" + user.getColor() + "']/a";
-                            p.runPhantom("http://www.supremenewyork.com/shop/all/" + user.getCategory(), By.xpath(target), user.getSize(), user, user.getItem(), user.getColor());
-                        } catch (InterruptedException ex) {
-                            Logger.getLogger(homeViewController.class.getName()).log(Level.SEVERE, null, ex);
-                        } catch (IOException ex) {
-                            Logger.getLogger(homeViewController.class.getName()).log(Level.SEVERE, null, ex);
-                        } catch (ParseException ex) {
-                            Logger.getLogger(homeViewController.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-
-                    }
-
-                };
-
-                one.start();
-
-                // Thread.sleep(200);
-            }
 
         }
 
