@@ -23,15 +23,12 @@ import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Select;
 
 import com.google.common.base.Function;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import java.util.Calendar;
-import java.util.Date;
 
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.chrome.ChromeDriver;
 
 public class Phantom {
 
@@ -83,7 +80,7 @@ public class Phantom {
                 driver.get(category);
             }
             person.setStatus("Waiting for Update" + test[i % 3]);
-            Thread.sleep(ThreadLocalRandom.current().nextInt(150, 500));
+            Thread.sleep(ThreadLocalRandom.current().nextInt(200, 800));
             driver.navigate().refresh();
             i++;
         }
@@ -193,8 +190,7 @@ public class Phantom {
         tEnd = System.currentTimeMillis();
         long tDelta = tEnd - ttStart;
         double elapsedSeconds = tDelta / 1000.0;
-
-        System.out.println( elapsedSeconds);
+      
         person.setStatus("Waiting for Confirmation");
 
         TimeUnit.SECONDS.sleep(5);
@@ -211,7 +207,10 @@ public class Phantom {
         person.setStatus("Succeeded");
         }
         
+       
+
         
+       
         
         driver.quit();
     }
