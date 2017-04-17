@@ -8,6 +8,7 @@ package supremeBot;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -28,6 +29,7 @@ public class PhantomFXML extends Application {
     static homeViewController myControllerHandle;
     static FileWriter  fw ;
     static BufferedWriter bw;
+    static Semaphore sem;
     Stage primaryStage;
 
     
@@ -72,7 +74,7 @@ public class PhantomFXML extends Application {
     public static void main(String[] args) throws IOException {
         fw = new FileWriter("speedResult.txt");
         bw = new BufferedWriter(fw);
-
+        sem = new Semaphore(1);
         if (System.getProperty("os.name").startsWith("W")) {
             System.setProperty("phantomjs.binary.path", "phantomjs.exe");
             System.setProperty("webdriver.chrome.driver", "chromedriver.exe");

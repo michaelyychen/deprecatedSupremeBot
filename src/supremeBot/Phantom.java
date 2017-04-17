@@ -29,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.chrome.ChromeDriver;
 
 public class Phantom {
 
@@ -40,7 +41,10 @@ public class Phantom {
         driver.quit();
     }
 
-    public void runPhantom(String category, By path, String sizeWanted, Account person, String item, String color) throws InterruptedException, IOException, ParseException {
+    public void runPhantom(String category, By path, String sizeWanted, Account person) throws InterruptedException, IOException, ParseException {
+
+        String item = person.getItem();
+        String color = person.getColor();
 
         person.setStatus("Started");
 
@@ -50,24 +54,23 @@ public class Phantom {
                 PhantomJSDriverService.PHANTOMJS_CLI_ARGS,
                 new String[]{"--load-images=no"});
 
-        driver = new PhantomJSDriver(desiredCapabilities);
+        driver = new PhantomJSDriver();
         //driver = new ChromeDriver();
         if (driver instanceof JavascriptExecutor) {
             js = (JavascriptExecutor) driver;
         }
 
+//        while(!driver.getCurrentUrl().equals("http://www.supremenewyork.com/")){
+//                person.setStatus("Cookies");
+//                driver.navigate().refresh();
+//                driver.get("http://www.supremenewyork.com/");        
+//                Thread.sleep(1000);
+//        }
+        //driver.get("http://www.supremenewyork.com/shop");
         
-        while(!driver.getCurrentUrl().equals("http://www.supremenewyork.com/")){
-            
-                driver.navigate().refresh();
-                driver.get("http://www.supremenewyork.com/");        
-                Thread.sleep(1000);
-        }
+        //setCookie(constructCookieValue(person));
+        
 
-        
-        setCookie(constructCookieValue(person));
-        long ttStart = System.currentTimeMillis();
-        // driver.manage().addCookie(cookie);
         driver.get(category);
 
         int i = 0;
@@ -75,56 +78,80 @@ public class Phantom {
         test[0] = ".";
         test[1] = "..";
         test[2] = "...";
-        while (!isElementExists(driver, path)) {
-            if (!driver.getCurrentUrl().equals(category)) {
-                driver.get(category);
-            }
-            person.setStatus("Waiting for Update" + test[i % 3]);
-            Thread.sleep(ThreadLocalRandom.current().nextInt(200, 800));
-            driver.navigate().refresh();
-            i++;
-        }
 
+        person.setStatus("Waiting for notification");
+        PhantomFXML.sem.acquire();
+       
+        int count =0;
+        
+
+        while (!isElementExists(path)&&PhantomFXML.sem.availablePermits()<2) {
+       // while (count<10&&PhantomFXML.sem.availablePermits()<2) {
+           person.setStatus("Waiting for Update" + test[i % 3]);
+           
+           if (!driver.getCurrentUrl().equals(category)) 
+               driver.get(category);
+           
+
+           Thread.sleep(ThreadLocalRandom.current().nextInt(200, 800));
+           driver.navigate().refresh();
+           i++;
+           count++;
+        }
+        
+       PhantomFXML.sem.release(5);
+
+       
+                
+        
         WebElement link = driver.findElement(path);
         driver.get(link.getAttribute("href"));
+        WebElement submitBtn;
+       long tStart = System.currentTimeMillis();
 
         if (!sizeWanted.equalsIgnoreCase("Free")) {
 
-            Select size = new Select(waitElement(driver, By.id("size")));
-
             try {
+                Select size = new Select(waitElement((By.id("size"))));
                 size.selectByVisibleText(sizeWanted);
+     
             } catch (NoSuchElementException e) {
                 person.setStatus("Size is S/O");
-
+                driver.quit();
                 return;
             }
         }
-
-        try {
-            driver.findElement(By.xpath("//*[@id=\"add-remove-buttons\"]/input")).submit();
+        
+        
+         try {
+           submitBtn = driver.findElement(By.xpath("//*[@id=\"add-remove-buttons\"]/input"));
         } catch (NoSuchElementException e) {
             person.setStatus("S/O");
             driver.quit();
             return;
         }
+
+        submitBtn.submit();
+        
+
+        
         person.setStatus("Added to cart");
 
-        long tStart = System.currentTimeMillis();
-        long tEnd = tStart;
-//        waitElement(driver, By.linkText("checkout now")).click();
+//        long tStart = System.currentTimeMillis();
+//        long tEnd = tStart;
 
-        while (!isElementExists(driver, By.linkText("checkout now"))) {
+        long  tEnd = System.currentTimeMillis();
+        while (!isElementExists(By.linkText("checkout now"))) {
 
             if (((tEnd - tStart) / 1000.0) > 5) {
                 tStart = System.currentTimeMillis();
                 driver.navigate().refresh();
                 person.setStatus("Retrying");
-                if (isElementExists(driver, By.xpath("//*[@id=\"add-remove-buttons\"]/input"))) {
+                if (isElementExists(By.xpath("//*[@id=\"add-remove-buttons\"]/input"))) {
 
                     if (!sizeWanted.equalsIgnoreCase("Free")) {
 
-                        Select size = new Select(waitElement(driver, By.id("size")));
+                        Select size = new Select(waitElement(By.id("size")));
 
                         try {
                             size.selectByVisibleText(sizeWanted);
@@ -141,84 +168,94 @@ public class Phantom {
             tEnd = System.currentTimeMillis();
             Thread.sleep(200);
         }
-
+       
+        
         driver.get("https://www.supremenewyork.com/checkout");
 //        tEnd = System.currentTimeMillis();
 //        long tDelta = tEnd - tStart;
 //        double elapsedSeconds = tDelta / 1000.0;
 //
 //        System.out.println(elapsedSeconds);
-        
+
         person.setStatus("Filling Form");
-        Thread.sleep(2000);
+        
 //        srcFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
 //
 //        FileUtils.copyFile(srcFile, new File(new SimpleDateFormat("yyyyMMdd_HH-mm-ss").format(Calendar.getInstance().getTime()) + "item.png"));
-       // WebElement credit = waitElement(driver, By.name("credit_card[cnb]"));
-       // setAttribute(credit, person.getCredit());
+        // WebElement credit = waitElement(driver, By.name("credit_card[cnb]"));
+        // setAttribute(credit, person.getCredit());
+        long ttStart = System.currentTimeMillis();
         
-        js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.name("credit_card[cnb]")), person.getCredit());
-
-       // waitElement(driver, By.id("credit_card_month"));
-       // selectAttribute("credit_card_month", person.getCreditmonth());
+        Thread.sleep(1200);
         
+        
+        //waitElement(By.id("order_billing_name"));
+        js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.id("order_billing_name")), person.getName());
+        js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.id("order_email")), person.getEmail());
+        js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.id("order_tel")), person.getPhone());
+        js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.id("bo")), person.getAddress1());
+        js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.id("order_billing_zip")), person.getZip());
+        js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.id("order_billing_city")),person.getCity());        
+        js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.id("cnb")), person.getCredit());
+        js.executeScript("document.getElementById(arguments[0]).value=arguments[1];", "order_billing_state", person.getState());
+        // waitElement(driver, By.id("credit_card_month"));
+        // selectAttribute("credit_card_month", person.getCreditmonth());
         js.executeScript("document.getElementById(arguments[0]).value=arguments[1];", "credit_card_month", person.getCreditmonth());
 
-      //  waitElement(driver, By.id("credit_card_year"));
-       // selectAttribute("credit_card_year", person.getCredityear());  
-        
+        //  waitElement(driver, By.id("credit_card_year"));
+        // selectAttribute("credit_card_year", person.getCredityear());  
         js.executeScript("document.getElementById(arguments[0]).value=arguments[1];", "credit_card_year", person.getCredityear());
 
-       // WebElement cvv = waitElement(driver, By.name("credit_card[vval]"));
-      //  setAttribute(cvv, person.getCvv());
-  
-        js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.name("credit_card[vval]")), person.getCvv());
+        // WebElement cvv = waitElement(driver, By.name("credit_card[vval]"));
+        //  setAttribute(cvv, person.getCvv());
+        js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.id("vval")), person.getCvv());
 
         driver.findElement(By.xpath("//*[@id=\"cart-cc\"]/fieldset/p[2]/label/div/ins")).click();
 
 //        srcFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
 //        FileUtils.copyFile(srcFile, new File(new SimpleDateFormat("yyyyMMdd_HH-mm-ss").format(Calendar.getInstance().getTime()) + person.getName() + " info.png"));
-        
         js.executeScript(" document.getElementsByClassName(\"g-recaptcha\")[0].remove()");
-        
-        waitElement(driver, By.xpath("//*[@id=\"pay\"]/input")).submit();
-        
-    
 
-     
+        waitElement(By.xpath("//*[@id=\"pay\"]/input")).submit();
 
         tEnd = System.currentTimeMillis();
         long tDelta = tEnd - ttStart;
         double elapsedSeconds = tDelta / 1000.0;
-      
+
         System.out.println(elapsedSeconds);
-        
+
         person.setStatus("Waiting for Confirmation");
-        
+
         TimeUnit.SECONDS.sleep(5);
 
         srcFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
 
-        FileUtils.copyFile(srcFile, new File(new SimpleDateFormat("yyyyMMdd_HH-mm-ss").format(Calendar.getInstance().getTime()) + person.getName() + ThreadLocalRandom.current().nextInt(1,100)+"confirmation.png"));
+        FileUtils.copyFile(srcFile, new File(new SimpleDateFormat("yyyyMMdd_HH-mm-ss").format(Calendar.getInstance().getTime()) + person.getName() + ThreadLocalRandom.current().nextInt(1, 100) + "confirmation.png"));
 
-        WebElement t =waitElement(driver, By.xpath("//*[@id=\"confirmation\"]"));
+    
         
-        
-        if(t.getText().startsWith("Unfortunately")){
-        person.setStatus("Unfortunately");
-        }else{
-        person.setStatus("Succeeded");
+         try {
+          WebElement t = driver.findElement(By.xpath("//*[@id=\"confirmation\"]"));
+          
+            if (t.getText().startsWith("Unfortunately")) {
+                person.setStatus("Unfortunately");
+            } else {
+                person.setStatus("Succeeded");
+            }
+          
+          
+          
+        } catch (NoSuchElementException e) {
+            person.setStatus("S/O");
+            driver.quit();
+            return;
         }
-        
-       
-
-      
-       
-        
+         
+         
         driver.quit();
     }
 
-    public boolean isFinished(WebDriver driver, By by) {
+    public boolean isFinished(By by) {
 
         boolean isExists = true;
 
@@ -233,7 +270,7 @@ public class Phantom {
         return isExists;
     }
 
-    public boolean isElementExists(WebDriver driver, By by) {
+    public boolean isElementExists(By by) {
         boolean isExists = true;
         try {
             driver.findElement(by);
@@ -244,7 +281,7 @@ public class Phantom {
         return isExists;
     }
 
-    private WebElement waitElement(WebDriver driver, By locator) {
+    private WebElement waitElement(By locator) {
         FluentWait<WebDriver> wait = new FluentWait<WebDriver>(driver)
                 .withTimeout(10, TimeUnit.SECONDS)
                 .pollingEvery(200, TimeUnit.MILLISECONDS)
@@ -259,7 +296,7 @@ public class Phantom {
     }
 
     public void setCookie(String value) {
-        js.executeScript("document.cookie = \"address= " + value + ",domain = 'www.supremenewyork.com',path='/',expires= '2017-04-13T03:48:20.712Z';\"");
+        js.executeScript("document.cookie = \"address= " + value + ",domain = 'www.supremenewyork.com',path='/',expires= '2017-12-13T03:48:20.712Z';\"");
     }
 
     public void setAttribute(WebElement element, String value) {

@@ -219,6 +219,7 @@ public class homeViewController implements Initializable {
 //            }
 
 ExecutorService executorService = Executors.newFixedThreadPool(data.size());
+
 for(Account user : data){
 executorService.execute(new Runnable() {
     public void run() {
@@ -226,7 +227,7 @@ executorService.execute(new Runnable() {
             Phantom p = new Phantom();
             list.add(p);
             String target = "//div[h1='" + user.getItem() + "' and p='" + user.getColor() + "']/a";
-            p.runPhantom("http://www.supremenewyork.com/shop/all/" + user.getCategory(), By.xpath(target), user.getSize(), user, user.getItem(), user.getColor());
+            p.runPhantom("http://www.supremenewyork.com/shop/all/" + user.getCategory(), By.xpath(target), user.getSize(), user);
         } catch (InterruptedException ex) {
             Logger.getLogger(homeViewController.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
@@ -238,6 +239,7 @@ executorService.execute(new Runnable() {
     }
 }
         );
+
 }
 executorService.shutdown();
 
@@ -308,7 +310,7 @@ executorService.shutdown();
 
         obj2.put("Users", ja);
 
-        try (FileWriter file = new FileWriter("user.txt")) {
+        try (FileWriter file = new FileWriter("user.rtf")) {
             file.write(obj2.toJSONString());
 
         } catch (IOException ex) {
@@ -322,10 +324,10 @@ executorService.shutdown();
 
         try {
 
-            File f = new File("user.txt");
+            File f = new File("user.rtf");
 
             if (f.exists()) {
-                Object obj = parser.parse(new FileReader("user.txt"));
+                Object obj = parser.parse(new FileReader("user.rtf"));
 
                 // JSONArray ja = (JSONArray) obj;
                 JSONObject jsonO = (JSONObject) obj;
