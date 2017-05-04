@@ -54,8 +54,8 @@ public class Phantom {
                 PhantomJSDriverService.PHANTOMJS_CLI_ARGS,
                 new String[]{"--load-images=no"});
 
-        driver = new PhantomJSDriver();
-        //driver = new ChromeDriver();
+        //driver = new PhantomJSDriver();
+        driver = new ChromeDriver();
         if (driver instanceof JavascriptExecutor) {
             js = (JavascriptExecutor) driver;
         }
@@ -70,8 +70,10 @@ public class Phantom {
         
         //setCookie(constructCookieValue(person));
         
-
+        PhantomFXML.semF.acquire();
         driver.get(category);
+        Thread.sleep(250);
+        PhantomFXML.semF.release();
 
         int i = 0;
         String[] test = new String[3];
@@ -112,6 +114,7 @@ public class Phantom {
         if (!sizeWanted.equalsIgnoreCase("Free")) {
 
             try {
+                person.setStatus("Selecting Size");
                 Select size = new Select(waitElement((By.id("size"))));
                 size.selectByVisibleText(sizeWanted);
      
@@ -188,6 +191,7 @@ public class Phantom {
         
         Thread.sleep(1200);
         
+        js.executeScript(" document.getElementsByClassName(\"g-recaptcha\")[0].remove()");
         
         //waitElement(By.id("order_billing_name"));
         js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.id("order_billing_name")), person.getName());
@@ -196,25 +200,36 @@ public class Phantom {
         js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.id("bo")), person.getAddress1());
         js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.id("order_billing_zip")), person.getZip());
         js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.id("order_billing_city")),person.getCity());        
-        js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.id("cnb")), person.getCredit());
         js.executeScript("document.getElementById(arguments[0]).value=arguments[1];", "order_billing_state", person.getState());
+        
+         
+        
+        js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.cssSelector("fieldset > div:nth-child(4) > div:first-child > input")), person.getCredit());
+
+        
+        
         // waitElement(driver, By.id("credit_card_month"));
         // selectAttribute("credit_card_month", person.getCreditmonth());
-        js.executeScript("document.getElementById(arguments[0]).value=arguments[1];", "credit_card_month", person.getCreditmonth());
-
+       // js.executeScript("document.getElementById(arguments[0]).value=arguments[1];", "credit_card_month", person.getCreditmonth());
+ //js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.cssSelector("#card_details > div:nth-child(2) > select:nth-child(1)")), person.getCvv());
+    
+ 
+        js.executeScript("document.querySelector(\"fieldset > div:nth-child(4) > div:nth-child(2) > select:nth-child(2)\").value=arguments[0];", person.getCreditmonth());
+ 
         //  waitElement(driver, By.id("credit_card_year"));
         // selectAttribute("credit_card_year", person.getCredityear());  
-        js.executeScript("document.getElementById(arguments[0]).value=arguments[1];", "credit_card_year", person.getCredityear());
+        js.executeScript("document.querySelector(\"fieldset > div:nth-child(4) > div:nth-child(2) > select:nth-child(3)\").value=arguments[0];", person.getCredityear());
+//        js.executeScript("document.getElementById(arguments[0]).value=arguments[1];", "credit_card_year", person.getCredityear());
 
         // WebElement cvv = waitElement(driver, By.name("credit_card[vval]"));
         //  setAttribute(cvv, person.getCvv());
-        js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.id("vval")), person.getCvv());
+        js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.cssSelector("fieldset > div:nth-child(4) > div:nth-child(3) > input")), person.getCvv());
 
         driver.findElement(By.xpath("//*[@id=\"cart-cc\"]/fieldset/p[2]/label/div/ins")).click();
 
 //        srcFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
 //        FileUtils.copyFile(srcFile, new File(new SimpleDateFormat("yyyyMMdd_HH-mm-ss").format(Calendar.getInstance().getTime()) + person.getName() + " info.png"));
-        js.executeScript(" document.getElementsByClassName(\"g-recaptcha\")[0].remove()");
+       
 
         waitElement(By.xpath("//*[@id=\"pay\"]/input")).submit();
 
@@ -242,17 +257,15 @@ public class Phantom {
             } else {
                 person.setStatus("Succeeded");
             }
-          
-          
-          
+     
         } catch (NoSuchElementException e) {
             person.setStatus("S/O");
-            driver.quit();
+           // driver.quit();
             return;
         }
          
          
-        driver.quit();
+       // driver.quit();
     }
 
     public boolean isFinished(By by) {

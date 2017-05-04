@@ -30,6 +30,7 @@ public class PhantomFXML extends Application {
     static FileWriter  fw ;
     static BufferedWriter bw;
     static Semaphore sem;
+    static Semaphore semF;
     Stage primaryStage;
 
     
@@ -59,7 +60,7 @@ public class PhantomFXML extends Application {
             }
         });
 
-        stage.setTitle("MC BOT v 3.0");
+        stage.setTitle("MC BOT v 3.2N");
         stage.setScene(scene);
         stage.show();
         
@@ -75,6 +76,7 @@ public class PhantomFXML extends Application {
         fw = new FileWriter("speedResult.txt");
         bw = new BufferedWriter(fw);
         sem = new Semaphore(1);
+        semF = new Semaphore(1);
         if (System.getProperty("os.name").startsWith("W")) {
             System.setProperty("phantomjs.binary.path", "phantomjs.exe");
             System.setProperty("webdriver.chrome.driver", "chromedriver.exe");
