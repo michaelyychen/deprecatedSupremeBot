@@ -204,7 +204,7 @@ public class Phantom {
         
          
         
-        js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.cssSelector("fieldset > div:nth-child(4) > div:first-child > input")), person.getCredit());
+        js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.cssSelector("#card_details > div:first-child > input")), person.getCredit());
 
         
         
@@ -214,16 +214,16 @@ public class Phantom {
  //js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.cssSelector("#card_details > div:nth-child(2) > select:nth-child(1)")), person.getCvv());
     
  
-        js.executeScript("document.querySelector(\"fieldset > div:nth-child(4) > div:nth-child(2) > select:nth-child(2)\").value=arguments[0];", person.getCreditmonth());
+        js.executeScript("document.querySelector(\"#card_details > div:nth-child(2) > select:nth-child(2)\").value=arguments[0];", person.getCreditmonth());
  
         //  waitElement(driver, By.id("credit_card_year"));
         // selectAttribute("credit_card_year", person.getCredityear());  
-        js.executeScript("document.querySelector(\"fieldset > div:nth-child(4) > div:nth-child(2) > select:nth-child(3)\").value=arguments[0];", person.getCredityear());
+        js.executeScript("document.querySelector(\"#card_details > div:nth-child(2) > select:nth-child(3)\").value=arguments[0];", person.getCredityear());
 //        js.executeScript("document.getElementById(arguments[0]).value=arguments[1];", "credit_card_year", person.getCredityear());
 
         // WebElement cvv = waitElement(driver, By.name("credit_card[vval]"));
         //  setAttribute(cvv, person.getCvv());
-        js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.cssSelector("fieldset > div:nth-child(4) > div:nth-child(3) > input")), person.getCvv());
+        js.executeScript("arguments[0].setAttribute('value', arguments[1])", driver.findElement(By.cssSelector("#card_details > div:nth-child(3) > input")), person.getCvv());
 
         driver.findElement(By.xpath("//*[@id=\"cart-cc\"]/fieldset/p[2]/label/div/ins")).click();
 

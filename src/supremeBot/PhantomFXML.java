@@ -60,7 +60,7 @@ public class PhantomFXML extends Application {
             }
         });
 
-        stage.setTitle("MC BOT v 3.2N");
+        stage.setTitle("MC BOT v 3.3N");
         stage.setScene(scene);
         stage.show();
         
