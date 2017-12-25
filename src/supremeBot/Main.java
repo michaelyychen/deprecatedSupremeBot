@@ -24,7 +24,7 @@ import javafx.stage.WindowEvent;
  *
  * @author MC
  */
-public class PhantomFXML extends Application {
+public class Main extends Application {
 
     static homeViewController myControllerHandle;
     static FileWriter  fw ;
@@ -32,8 +32,7 @@ public class PhantomFXML extends Application {
     static Semaphore sem;
     static Semaphore semF;
     Stage primaryStage;
-
-    
+   
     
     @Override
     public void start(Stage stage) throws Exception {
@@ -46,43 +45,38 @@ public class PhantomFXML extends Application {
 
         Scene scene = new Scene(root);
 
-        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            public void handle(WindowEvent we) {
-                try {
-                    myControllerHandle.handleExitRequest();
-                    bw.close();
-                    fw.close();
-                    Platform.exit();
-                    System.exit(0);
-                } catch (IOException ex) {
-                    Logger.getLogger(PhantomFXML.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        stage.setOnCloseRequest((WindowEvent we) -> {
+            try {
+                myControllerHandle.handleExitRequest();
+                bw.close();
+                fw.close();
+                Platform.exit();
+                System.exit(0);
+            } catch (IOException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
 
         stage.setTitle("MC BOT v 3.3N");
         stage.setScene(scene);
         stage.show();
-        
-        
- 
-        
+              
     }
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) throws IOException {
+
+    public static void main(String[] args) throws IOException {      
         fw = new FileWriter("speedResult.txt");
         bw = new BufferedWriter(fw);
         sem = new Semaphore(1);
         semF = new Semaphore(1);
+        
+        //Depends on which os the program is running on.
         if (System.getProperty("os.name").startsWith("W")) {
             System.setProperty("phantomjs.binary.path", "phantomjs.exe");
             System.setProperty("webdriver.chrome.driver", "chromedriver.exe");
         } else {
-            System.setProperty("phantomjs.binary.path", "/Users/MC/Desktop/phantomjs");
-            System.setProperty("webdriver.chrome.driver", "/Users/MC/Desktop/chromedriver");
+            System.setProperty("phantomjs.binary.path", "/Desktop/phantomjs");
+            System.setProperty("webdriver.chrome.driver", "/Desktop/chromedriver");
         }
         
         launch(args);

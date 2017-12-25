@@ -43,22 +43,18 @@ public class dialogController implements Initializable {
     String target = newItemName.getText();
     
     if(target.equals("")){
-    Stage currentStage = (Stage)gp.getScene().getWindow();
-    currentStage.close();
-    return;
+        Stage currentStage = (Stage)gp.getScene().getWindow();
+        currentStage.close();
+        return;
     }
+
+    List<Account> t = Main.myControllerHandle.data;
     
-    
-    List<Account> t = PhantomFXML.myControllerHandle.data;
-    
-    for(Account a : t){
-    
+    for(Account a : t){ 
         if(a.getItem().equals(old))
             a.setItem(target);
-       
     }
-        
-        
+
     Stage currentStage = (Stage)gp.getScene().getWindow();
     currentStage.close();
         

@@ -81,8 +81,6 @@ public class itemViewController implements Initializable {
     
     @FXML
     private void handleFinishedAction(ActionEvent event) {
-        
-       
 
         Account newTarget = new Account();
         newTarget.setName(nameValue.getText().trim());
@@ -102,10 +100,8 @@ public class itemViewController implements Initializable {
         newTarget.setSize(sizeBox.getSelectionModel().getSelectedItem());
         newTarget.setType("Visa");
         newTarget.setStatus("Ready");
-        
-       
 
-        homeViewController h = PhantomFXML.myControllerHandle;
+        homeViewController h = Main.myControllerHandle;
         h.data.add(newTarget);
         
         currentStage = (Stage)sp.getScene().getWindow();
@@ -128,10 +124,7 @@ public class itemViewController implements Initializable {
 
         editButton.setDisable(true);
         editButton.setVisible(false);
-        
-       // 
-        
-        
+
     }
 
     public void editItem(int index,Account a) {
@@ -189,7 +182,7 @@ public class itemViewController implements Initializable {
         newTarget.setStatus("Ready");
         
         
-        PhantomFXML.myControllerHandle.data.set(indexToUpdate,newTarget);
+        Main.myControllerHandle.data.set(indexToUpdate,newTarget);
         currentStage = (Stage)sp.getScene().getWindow();
         currentStage.close();
         

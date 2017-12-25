@@ -52,7 +52,7 @@ public class homeViewController implements Initializable {
 
     Account a;
     ObservableList<Account> data = FXCollections.observableArrayList();
-    ArrayList<Phantom> list = new ArrayList<Phantom>();
+    ArrayList<Bot> list = new ArrayList<Bot>();
 
     @FXML
     public TableView<Account> mainTable;
@@ -78,9 +78,9 @@ public class homeViewController implements Initializable {
 
     @FXML
     private Button startBtn;
-    
+
     Account clipboard;
-    
+
     @FXML
     private void handleAddAction(ActionEvent event) throws IOException {
 
@@ -91,25 +91,19 @@ public class homeViewController implements Initializable {
         itemStage.setTitle("Add Item");
         itemStage.setScene(scene);
         itemStage.show();
-        
-//        itemStage.setOnCloseRequest((WindowEvent we) -> {
-//            itemStage.close();
-//        });
-        
 
     }
 
     @FXML
     private void handleClickAction(MouseEvent event) throws IOException {
         TableRow<Account> row = new TableRow<>();
-        
+
         Account temp = mainTable.getSelectionModel().getSelectedItem();
-        
-        if (event.getClickCount() == 2 && (temp!=null)) {
-            
+
+        if (event.getClickCount() == 2 && (temp != null)) {
+
             System.out.println("Click Action");
-           
-            
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("itemView.fxml"));
 
             Parent root = loader.load();
@@ -120,160 +114,108 @@ public class homeViewController implements Initializable {
             itemStage.setTitle("Edit Item");
             itemStage.setScene(scene);
             itemStage.show();
-            
-            itemController.editItem(mainTable.getSelectionModel().getFocusedIndex(),temp);
-            
-//            itemStage.setOnCloseRequest((WindowEvent we) -> {
-//                itemStage.close();
-//            });
-            }
+
+            itemController.editItem(mainTable.getSelectionModel().getFocusedIndex(), temp);
+
         }
-        @FXML
-        private void handleContextDeleteAction(ActionEvent event) {
+    }
+
+    @FXML
+    private void handleContextDeleteAction(ActionEvent event) {
         Account temp = mainTable.getSelectionModel().getSelectedItem();
-        if(temp!=null)
+        if (temp != null) {
             data.remove(temp);
-        
         }
-        
-        @FXML
-        private void handleKeyAction(KeyEvent event) {
-        
-        if (event.getCode().equals(KeyCode.DELETE)) {
-            //Delete or whatever you like:       
+
+    }
+
+    @FXML
+    private void handleKeyAction(KeyEvent event) {
+
+        if (event.getCode().equals(KeyCode.DELETE))     
             data.remove(mainTable.getSelectionModel().getSelectedItem());
-        }                
-        if (event.getCode() == KeyCode.C && event.isControlDown()) {
-             clipboard = mainTable.getSelectionModel().getSelectedItem();
-                
-        }
         
+        if (event.getCode() == KeyCode.C && event.isControlDown()) 
+            clipboard = mainTable.getSelectionModel().getSelectedItem();
+               
         if (event.getCode() == KeyCode.V && event.isControlDown()) {
-            if(clipboard!=null)
+            if (clipboard != null) 
                 data.add(clipboard);
-                
         }
-        
+    }
+
+    @FXML
+    private void handleContextReplaceAction(ActionEvent event) throws IOException {
+
+        Account temp = mainTable.getSelectionModel().getSelectedItem();
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("dialog.fxml"));
+
+        Parent root = loader.load();
+
+        dialogController c = (dialogController) loader.getController();
+
+        Scene scene = new Scene(root);
+        Stage dialogStage = new Stage();
+        dialogStage.setTitle("Replace All");
+        dialogStage.setScene(scene);
+        dialogStage.show();
+
+        if (temp != null) {
+            c.populateOldName(temp.getItem());
         }
-        
-        
-        @FXML
-        private void handleContextReplaceAction(ActionEvent event) throws IOException {
-            
-            Account temp = mainTable.getSelectionModel().getSelectedItem();
-            
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("dialog.fxml"));
+    }
 
-            Parent root = loader.load();
-
-            dialogController c = (dialogController) loader.getController();
-            
-            
-            Scene scene = new Scene(root);
-            Stage dialogStage = new Stage();
-            dialogStage.setTitle("Replace All");
-            dialogStage.setScene(scene);
-            dialogStage.show();
-            
-            if(temp!=null)
-                c.populateOldName(temp.getItem());
-                
-        }
-        
-        
-        
-        @FXML
-        private void handleStartRequest(ActionEvent event) throws InterruptedException {
+    @FXML
+    private void handleStartRequest(ActionEvent event) throws InterruptedException {
         startBtn.setDisable(true);
         startBtn.setMinWidth(100);
         startBtn.setText("Running...");
 
-//           for (Account user : data) {
-//
-//                Thread one;
-//                one = new Thread() {
-//
-//                    public void run() {
-//
-//                        try {
-//                            Phantom p = new Phantom();
-//                            list.add(p);
-//                            String target = "//div[h1='" + user.getItem() + "' and p='" + user.getColor() + "']/a";
-//                            p.runPhantom("http://www.supremenewyork.com/shop/all/" + user.getCategory(), By.xpath(target), user.getSize(), user, user.getItem(), user.getColor());
-//                        } catch (InterruptedException ex) {
-//                            Logger.getLogger(homeViewController.class.getName()).log(Level.SEVERE, null, ex);
-//                        } catch (IOException ex) {
-//                            Logger.getLogger(homeViewController.class.getName()).log(Level.SEVERE, null, ex);
-//                        } catch (ParseException ex) {
-//                            Logger.getLogger(homeViewController.class.getName()).log(Level.SEVERE, null, ex);
-//                        }
-//
-//                    }
-//
-//                };
-//
-//                one.start();
-//
-//                Thread.sleep(100);
-//            }
+        ExecutorService executorService = Executors.newFixedThreadPool(data.size());
 
-ExecutorService executorService = Executors.newFixedThreadPool(data.size());
+        for (Account user : data) {
+            executorService.execute(() -> {
+                try {
+                    Bot p = new Bot();
+                    list.add(p);
+                    String target = "//div[h1='" + user.getItem() + "' and p='" + user.getColor() + "']/a";
+                    p.start("http://www.supremenewyork.com/shop/all/" + user.getCategory(), By.xpath(target), user.getSize(), user);
+                } catch (InterruptedException | IOException | ParseException ex) {
+                    Logger.getLogger(homeViewController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            });
 
-for(Account user : data){
-executorService.execute(new Runnable() {
-    public void run() {
-        try {
-            Phantom p = new Phantom();
-            list.add(p);
-            String target = "//div[h1='" + user.getItem() + "' and p='" + user.getColor() + "']/a";
-            p.runPhantom("http://www.supremenewyork.com/shop/all/" + user.getCategory(), By.xpath(target), user.getSize(), user);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(homeViewController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(homeViewController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ParseException ex) {
-            Logger.getLogger(homeViewController.class.getName()).log(Level.SEVERE, null, ex);
         }
+        executorService.shutdown();
 
     }
-}
-        );
 
-}
-executorService.shutdown();
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
 
+        mainTable.setEditable(true);
+        mainTable.setItems(data);
 
-        }
+        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+        emailCol.setCellValueFactory(new PropertyValueFactory<>("email"));
+        addrCol.setCellValueFactory(new PropertyValueFactory<>("address1"));
+        cardCol.setCellValueFactory(new PropertyValueFactory<>("credit"));
+        ItemCol.setCellValueFactory(new PropertyValueFactory<>("item"));
+        categoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
+        colorCol.setCellValueFactory(new PropertyValueFactory<>("color"));
+        sizeCol.setCellValueFactory(new PropertyValueFactory<>("size"));
+        statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
 
-        @Override
-        public void initialize (URL url, ResourceBundle rb) {
-
-            
-            
-            mainTable.setEditable(true);
-            mainTable.setItems(data);
-
-            nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-            emailCol.setCellValueFactory(new PropertyValueFactory<>("email"));
-            addrCol.setCellValueFactory(new PropertyValueFactory<>("address1"));
-            cardCol.setCellValueFactory(new PropertyValueFactory<>("credit"));
-            ItemCol.setCellValueFactory(new PropertyValueFactory<>("item"));
-            categoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
-            colorCol.setCellValueFactory(new PropertyValueFactory<>("color"));
-            sizeCol.setCellValueFactory(new PropertyValueFactory<>("size"));
-            statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
-
-            loadUser();
-        }
-
-    
+        loadUser();
+    }
 
     public void handleExitRequest() {
-        
+
         saveUser(data);
 
-        for (Phantom p : list) {
+        for (Bot p : list) {
             p.quit();
         }
 
@@ -329,7 +271,6 @@ executorService.shutdown();
             if (f.exists()) {
                 Object obj = parser.parse(new FileReader("user.rtf"));
 
-                // JSONArray ja = (JSONArray) obj;
                 JSONObject jsonO = (JSONObject) obj;
                 JSONArray slideContent = (JSONArray) jsonO.get("Users");
                 Iterator i = slideContent.iterator();
@@ -358,10 +299,9 @@ executorService.shutdown();
                     data.add(temp);
 
                 }
-
             }
 
-        } catch (Exception e) {
+        } catch (IOException | org.json.simple.parser.ParseException e) {
             e.printStackTrace();
         }
 
